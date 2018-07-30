@@ -48,9 +48,9 @@ int main(int argc, char *argv[])
         if (res == -1 || res == -2) break;
        
         uint8_t  ETH_HL          = 14;
-        uint16_t ETHERTYPE_PCKT  = (packet[12] << 8) | packet[13];
+        uint16_t PCKT_ETHERTYPE  = (packet[12] << 8) | packet[13];
         
-        uint16_t IPPROTO_PCKT    = packet[ETH_HL + 9];
+        uint16_t PCKT_IPPROTO    = packet[ETH_HL + 9];
         uint8_t  IP_IHL;
         
         uint16_t TCP_SRC_PORT;
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
         uint8_t  DATA_OFFSET     = 0;
         uint8_t  DATA_PRINT_BASE = 0;
         
-        if (ETHERTYPE_PCKT != ETHERTYPE_IP)
+        if (PCKT_ETHERTYPE != ETHERTYPE_IP)
         {
             //printf("Ethertype not IP: dropped packet info... :(");
             //printf("\n\n");
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 
         IP_IHL = (packet[ETH_HL + 0] & 0x0F) << 2;
 
-        if (IPPROTO_PCKT != IPPROTO_TCP)
+        if (PCKT_IPPROTO != IPPROTO_TCP)
         {
             //printf("IP proto not TCP: dropped packet info... :(");
             //printf("\n\n");
