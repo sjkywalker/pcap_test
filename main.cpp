@@ -2,7 +2,7 @@
 /* Program Description */
 /* 
  * Parses packet contents and retrieves following data
- * eth.smac, eth.dmac / ip.sip, ip.dip / tcp.sport, tcp.dport / data(max. of 16 bytes)
+ * eth.smac, eth.dmac / ip.sip, ip.dip / tcp.sport, tcp.dport / data (max. of 16 bytes)
  * 
  * Any 'non-TCP/IP' packet is omitted
  */
@@ -100,8 +100,8 @@ int main(int argc, char *argv[])
         printf("[Destination TCP  PORT #] %5d\n", TCP_DST_PORT);
         printf("\n");
 
-        printf("[DATA]\n");
-        for (int i = DATA_PRINT_BASE; i < header->caplen; i++)
+        printf("[DATA (up to 16 bytes displayed)]\n");
+        for (int i = DATA_PRINT_BASE; (i < header->caplen) && (i < DATA_OFFSET + 16); i++)
         {
             if      (i < DATA_OFFSET) printf("-- ");
             else    printf("%02x ", packet[i]);
@@ -119,9 +119,7 @@ int main(int argc, char *argv[])
         }
 ----------------------------------------------------------------------*/     
         
-        printf("\n");
-        printf("%s", div);
-        printf("\n");
+        printf("\n%s\n", div);
     }
 
     pcap_close(handle);
