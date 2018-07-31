@@ -5,6 +5,8 @@
  * eth.smac, eth.dmac / ip.sip, ip.dip / tcp.sport, tcp.dport / data (max. of 16 bytes)
  * 
  * Any 'non-TCP/IP' packet is omitted
+ * 
+ * Copyright © 2018 James Sung. All rights reserved.
  */
 /*----------------------------------------------------------------------*/
 
