@@ -105,11 +105,11 @@ int main(int argc, char *argv[])
 		printf("[DATA (up to 16 bytes displayed)]\n");
 		for (int i = DATA_PRINT_BASE; (i < header->caplen) && (i < DATA_OFFSET + 16); i++)
 		{
-			if		(i < DATA_OFFSET) printf("-- ");
-			else	printf("%02x ", packet[i]);
+			if (i < DATA_OFFSET) printf("-- ");
+			else                 printf("%02x ", packet[i]);
 			
-			if (i % 16 == 7)	printf(" ");
-			if (i % 16 == 15)	printf("\n");
+			if (i % 16 == 7)  printf(" ");
+			if (i % 16 == 15) printf("\n");
 		}
 		
 /* print packet contents------------------------------------------------
