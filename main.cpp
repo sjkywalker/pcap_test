@@ -1,14 +1,4 @@
-/*----------------------------------------------------------------------*/
-/* Program Description */
-/* 
- * Parses packet contents and retrieves following data
- * eth.smac, eth.dmac / ip.sip, ip.dip / tcp.sport, tcp.dport / data (max. of 16 bytes)
- * 
- * Any 'non-TCP/IP' packet is omitted
- * 
- * Copyright © 2018 James Sung. All rights reserved.
- */
-/*----------------------------------------------------------------------*/
+/* Copyright © 2018 James Sung. All rights reserved. */
 
 #include <stdio.h>
 #include <stdint.h>

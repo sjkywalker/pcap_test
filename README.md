@@ -16,6 +16,17 @@ This program parses network packets of given interface and displays the contents
 3. Display
 ```
 
+The following data is retrieved.
+
+```txt
+* eth.smac, eth.dmac
+* ip.sip, ip.dip
+* tcp.sport, tcp.dport
+* data (max. of 32 bytes)
+```
+
+*Any 'non-TCP/IP' packet is omitted.*
+
 ### Development Environment
 
 ```bash
@@ -70,3 +81,4 @@ You might need root priviledges to capture network packets.
 
 * **James Sung** - *Initial work* - [sjkywalker](https://github.com/sjkywalker)
 * Copyright © 2018 James Sung. All rights reserved.
+
