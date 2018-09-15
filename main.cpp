@@ -102,8 +102,8 @@ int main(int argc, char *argv[])
 		printf("[Destination TCP  PORT #] %5d\n", TCP_DST_PORT);
 		printf("\n");
 
-		printf("[DATA (up to 16 bytes displayed)]\n");
-		for (int i = DATA_PRINT_BASE; (i < header->caplen) && (i < DATA_OFFSET + 16); i++)
+		printf("[DATA (up to 32 bytes displayed)]\n");
+		for (int i = DATA_PRINT_BASE; (i < header->caplen) && (i < DATA_OFFSET + 32); i++)
 		{
 			if (i < DATA_OFFSET) printf("-- ");
 			else                 printf("%02x ", packet[i]);
