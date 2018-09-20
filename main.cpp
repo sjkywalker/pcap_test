@@ -22,6 +22,8 @@ int main(int argc, char *argv[])
 	char *dev = argv[1];
 	char errbuf[PCAP_ERRBUF_SIZE];
 	pcap_t *handle = pcap_open_live(dev, BUFSIZ, 1, 1000, errbuf);
+//	pcap_t *handle = pcap_open_offline("path/to/pcap/file", errbuf);
+//	do this to use a pcap file instead of real-time capturing
 
 	if (handle == NULL)
 	{
