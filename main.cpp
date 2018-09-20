@@ -46,6 +46,7 @@ int main(int argc, char *argv[])
 		
 		uint16_t PCKT_IPPROTO    = packet[ETH_HL + 9];
 		uint8_t  IP_IHL;
+		uint16_t IP_TOTLEN;
 		
 		uint16_t TCP_SRC_PORT;
 		uint16_t TCP_DST_PORT;
@@ -53,6 +54,7 @@ int main(int argc, char *argv[])
 		
 		uint8_t  DATA_OFFSET     = 0;
 		uint8_t  DATA_PRINT_BASE = 0;
+
 		
 		if (PCKT_ETHERTYPE != ETHERTYPE_IP)
 		{
@@ -61,8 +63,9 @@ int main(int argc, char *argv[])
 			continue;
 		}
 
-		IP_IHL = (packet[ETH_HL + 0] & 0x0F) << 2;
-
+		IP_IHL    = (packet[ETH_HL + 0] & 0x0F) << 2;
+		IP_TOTLEN = (packet[ETH_HL + 2] << 8) + (packet[ETH_HL + 3]);
+		
 		if (PCKT_IPPROTO != IPPROTO_TCP)
 		{
 			//printf("IP proto not TCP: dropped packet info... :(");
@@ -95,7 +98,7 @@ int main(int argc, char *argv[])
 		printf("\n");
 
 		printf("[DATA (up to 32 bytes displayed)]\n");
-		for (int i = DATA_PRINT_BASE; (i < header->caplen) && (i < DATA_OFFSET + 32); i++)
+		for (int i = DATA_PRINT_BASE; (i < DATA_OFFSET + IP_TOTLEN - IP_IHL - TCP_HL) && (i < DATA_OFFSET + 32); i++)
 		{
 			if (i < DATA_OFFSET) printf("-- ");
 			else                 printf("%02x ", packet[i]);
