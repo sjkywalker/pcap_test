@@ -58,7 +58,7 @@ make
 ```
 
 ### Run
-
+i
 Format
 
 ```bash
@@ -76,6 +76,8 @@ You might need root priviledges to capture network packets.
 ## Acknowledgements
 
 * [Simple pcap programming](https://gitlab.com/gilgil/network/wikis/ethernet-packet-dissection/pcap-programming)
+* [Winpcap user's manual](* https://www.winpcap.org/docs/docs_40_2/html/group__wpcap.html)
+* [Winpcap user's manual - def](https://www.winpcap.org/docs/docs_40_2/html/group__wpcap__def.html)
 
 ## Authors
 

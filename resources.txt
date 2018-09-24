@@ -1,4 +1,0 @@
-winpcap user's manual
-* https://www.winpcap.org/docs/docs_40_2/html/group__wpcap.html
-* https://www.winpcap.org/docs/docs_40_2/html/group__wpcap__def.html
-
