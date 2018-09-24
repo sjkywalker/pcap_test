@@ -58,7 +58,7 @@ make
 ```
 
 ### Run
-i
+
 Format
 
 ```bash
