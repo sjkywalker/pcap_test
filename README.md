@@ -43,9 +43,15 @@ This program includes the following headers. Make sure you have the right packag
 
 ```c
 #include <pcap.h>
+#include <libnet.h>
 ```
 
-Install with `sudo apt install libpcap-dev`.
+Install with the following commands.
+
+```bash
+sudo apt install libpcap-dev
+sudo apt install libnet-dev
+```
 
 ## Running the program
 

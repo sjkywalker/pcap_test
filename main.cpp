@@ -1,15 +1,11 @@
 /* Copyright © 2018 James Sung. All rights reserved. */
+// usage: ./pcap_test <interface>
 
-#include <stdio.h>
-#include <stdint.h>
-#include <pcap.h>
-#include <netinet/ip.h>
-#include <netinet/in.h>
-#include <netinet/if_ether.h>
+#include "functions.h"
 
-char div[] = "*******************************************************************";
 
-void usage(void);
+char divisor[] = "*******************************************************************";
+
 
 int main(int argc, char *argv[])
 {
@@ -19,114 +15,69 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	char *dev = argv[1];
-	char errbuf[PCAP_ERRBUF_SIZE];
+	char   *dev = argv[1];
+	char    errbuf[PCAP_ERRBUF_SIZE];
 	pcap_t *handle = pcap_open_live(dev, BUFSIZ, 1, 1000, errbuf);
-//	pcap_t *handle = pcap_open_offline("path/to/pcap/file", errbuf);
-//	do this to use a pcap file instead of real-time capturing
+	//pcap_t *handle = pcap_open_offline("path/to/pcap/file", errbuf);
+	// toggle `handle` to use either real-time capturing or existing pcap file
 
 	if (handle == NULL)
 	{
-		fprintf(stderr, "couldn't open device %s: %s\n", dev, errbuf);
+		fprintf(stderr, "[-] Couldn't open device %s: %s\n", dev, errbuf);
+
 		return -1;
 	}
 
-	printf("Receiving packets...\n\n");
+	printf("[+] Receiving packets...\n\n");
 
 	while (true)
 	{
 		struct pcap_pkthdr *header;
-		const uint8_t *packet;
+		const uint8_t      *packet;
 		int res = pcap_next_ex(handle, &header, &packet);
-		if (res == 0) continue;
-		if (res == -1 || res == -2) break;
-	   
-		uint8_t  ETH_HL          = 14;
-		uint16_t PCKT_ETHERTYPE  = (packet[12] << 8) | packet[13];
 		
-		uint16_t PCKT_IPPROTO    = packet[ETH_HL + 9];
-		uint8_t  IP_IHL;
-		uint16_t IP_TOTLEN;
+		if (res == 0)               { continue; }
+		if (res == -1 || res == -2) { break; }
 		
-		uint16_t TCP_SRC_PORT;
-		uint16_t TCP_DST_PORT;
-		uint8_t  TCP_HL;
-		
-		uint8_t  DATA_OFFSET     = 0;
-		uint8_t  DATA_PRINT_BASE = 0;
+		struct libnet_ethernet_hdr *PCKT_ETH_HDR = (struct libnet_ethernet_hdr *)packet;
 
-		
-		if (PCKT_ETHERTYPE != ETHERTYPE_IP)
-		{
-			//printf("Ethertype not IP: dropped packet info... :(");
-			//printf("\n\n");
-			continue;
-		}
+		uint16_t PCKT_ETHERTYPE = ntohs(PCKT_ETH_HDR->ether_type);
 
-		IP_IHL    = (packet[ETH_HL + 0] & 0x0F) << 2;
-		IP_TOTLEN = (packet[ETH_HL + 2] << 8) + (packet[ETH_HL + 3]);
+		uint16_t PCKT_IPPROTO;
+
+		uint8_t PCKT_PRINTBASE;
+		uint8_t PCKT_DATAOFFSET;
+		uint8_t PCKT_DATALEN;
+
+		// non TCP/IP packets omitted from print
+		if (PCKT_ETHERTYPE != ETHERTYPE_IP) { continue; }
 		
-		if (PCKT_IPPROTO != IPPROTO_TCP)
-		{
-			//printf("IP proto not TCP: dropped packet info... :(");
-			//printf("\n\n");
-			continue;
-		}
+		struct libnet_ipv4_hdr *PCKT_IP_HDR = (struct libnet_ipv4_hdr *)(packet + sizeof(struct libnet_ethernet_hdr));
+
+		PCKT_IPPROTO = PCKT_IP_HDR->ip_p; //printf("ipproto: 0x%02x\n", PCKT_IPPROTO);
 		
-		printf("%s\n", div);
-		// non-TCP/IP packets omitted from print
+		if (PCKT_IPPROTO != IPPROTO_TCP) { continue; }
+	
+		struct libnet_tcp_hdr *PCKT_TCP_HDR = (struct libnet_tcp_hdr *)(packet + sizeof(struct libnet_ethernet_hdr) + (PCKT_IP_HDR->ip_hl << 2));
+	
+		PCKT_DATAOFFSET = sizeof(struct libnet_ethernet_hdr) + (PCKT_IP_HDR->ip_hl << 2) + (PCKT_TCP_HDR->th_off << 2);
+		PCKT_PRINTBASE = (PCKT_DATAOFFSET >> 4) << 4;
+		PCKT_DATALEN = ntohs(PCKT_IP_HDR->ip_len) - (PCKT_IP_HDR->ip_hl << 2) - (PCKT_TCP_HDR->th_off << 2);
+
+		printf("%s\n", divisor);
+		
 		printf("<%u bytes captured>\n\n", header->caplen);
 
-		TCP_HL = ((packet[ETH_HL + IP_IHL + 12] & 0xF0) >> 4) << 2;
+		print_eth_info(PCKT_ETH_HDR); puts("");
+		print_ip_info(PCKT_IP_HDR); puts("");
+		print_tcp_info(PCKT_TCP_HDR); puts("");
+		print_data_info(packet, PCKT_PRINTBASE, PCKT_DATAOFFSET, PCKT_DATALEN); puts("");
 
-		DATA_OFFSET     = ETH_HL + IP_IHL + TCP_HL; 
-		DATA_PRINT_BASE = (DATA_OFFSET >> 4) << 4; 
-
-		printf("[Source      MAC Address] %02x:%02x:%02x:%02x:%02x:%02x\n", packet[6], packet[7], packet[8], packet[9], packet[10], packet[11]);
-		printf("[Destination MAC Address] %02x:%02x:%02x:%02x:%02x:%02x\n", packet[0], packet[1], packet[2], packet[3], packet[4], packet[5]);
-		printf("\n");
-
-		printf("[Source      IP  Address] %3d.%3d.%3d.%3d\n", packet[26], packet[27], packet[28], packet[29]);
-		printf("[Destination IP  Address] %3d.%3d.%3d.%3d\n", packet[30], packet[31], packet[32], packet[33]);
-		printf("\n");
-
-		TCP_SRC_PORT = (packet[34] << 8) | packet[35];
-		TCP_DST_PORT = (packet[36] << 8) | packet[37];
-
-		printf("[Source      TCP  Port #] %5d\n", TCP_SRC_PORT);
-		printf("[Destination TCP  PORT #] %5d\n", TCP_DST_PORT);
-		printf("\n");
-
-		printf("[DATA (up to 32 bytes displayed)]\n");
-		for (int i = DATA_PRINT_BASE; (i < DATA_OFFSET + IP_TOTLEN - IP_IHL - TCP_HL) && (i < DATA_OFFSET + 32); i++)
-		{
-			if (i < DATA_OFFSET) printf("-- ");
-			else                 printf("%02x ", packet[i]);
-			
-			if (i % 16 == 7)  printf(" ");
-			if (i % 16 == 15) printf("\n");
-		}
-		
-/* print packet contents------------------------------------------------
-		for (int i = 0; i < header->caplen; i++)
-		{
-			printf("%02x ", packet[i]);
-			if (i % 16 == 7)	printf(" ");
-			if (i % 16 == 15)	printf("\n");
-		}
-----------------------------------------------------------------------*/	 
-		
-		printf("\n%s\n", div);
+		printf("%s\n", divisor);
 	}
 
-	pcap_close(handle);
+	printf("[*] Program exiting...\n");
 
 	return 0;
-}
-
-void usage(void)
-{
-	printf("syntax: pcap_test <interface>\n");
-	printf("sample: pcap_test wlan0\n");
 }
 

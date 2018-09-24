@@ -1,10 +1,13 @@
 all: pcap_test
 
-main.o: main.cpp
+pcap_test: main.o functions.o
+	g++ -g -o pcap_test main.o functions.o -lpcap
+
+main.o:
 	g++ -g -c -o main.o main.cpp
 
-pcap_test: main.o
-	g++ -g -o pcap_test main.o -lpcap
+functions.o:
+	g++ -g -c -o functions.o functions.cpp
 
 clean:
 	rm -f *.o
